@@ -141,14 +141,14 @@ func TestShouldMapCsvToTimeSeries(t *testing.T) {
 	mapped, err := api.MapToSeriesObservation("temperature", r)
 
 	if err != nil {
-		t.Errorf("expected error to be nil, but got %v", err)
+		t.Errorf("expected error to be nil, but got %v", err.Error())
 	}
 
 	if len(mapped) != 2 {
 		t.Errorf("expected len(mapped) to be 2, but was %v", len(mapped))
 	}
 
-	if mapped[0].Time != "2021-09-18T14:15:40+00:00" {
+	if mapped[0].Time != "2021-09-18T14:40:40+02:00" {
 		t.Errorf("expected first timestamp to be 2021-09-18T14:15:40+00:00, but was %v", mapped[0].Time)
 	}
 
@@ -158,5 +158,5 @@ func TestShouldMapCsvToTimeSeries(t *testing.T) {
 }
 
 const csvPayload = `timestamp,lat,lon,depth,temperature,conductivity
-1631968840,58.144699,7.998280,69.69,420.69
-1631969344,50.421478,8.593940,12.34,56.78`
+1631968840,58.144699,7.998280,33.33,69.69,420.69
+1631969344,50.421478,8.593940,44.44,12.34,56.78`

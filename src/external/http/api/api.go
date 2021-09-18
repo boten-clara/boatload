@@ -74,40 +74,40 @@ func MapToSeriesObservation(key string, data io.Reader) ([]domainEntities.Series
 	header, err := reader.Read()
 
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to get reader: %v", err)
 	}
 
 	keyIndex, err := getKeyIndex(header, key) // TODO better validation
-	if err == nil {
+	if err != nil {
 		return []domainEntities.SeriesObservation{}, err
 	}
 	timeIndex, err := getKeyIndex(header, "timestamp")
-	if err == nil {
+	if err != nil {
 		return []domainEntities.SeriesObservation{}, err
 	}
 	lonIndex, err := getKeyIndex(header, "lat")
-	if err == nil {
+	if err != nil {
 		return []domainEntities.SeriesObservation{}, err
 	}
 	latIndex, err := getKeyIndex(header, "lon")
-	if err == nil {
+	if err != nil {
 		return []domainEntities.SeriesObservation{}, err
 	}
 	depthIndex, err := getKeyIndex(header, "depth")
-	if err == nil {
+	if err != nil {
 		return []domainEntities.SeriesObservation{}, err
 	}
 
 	observations := []domainEntities.SeriesObservation{}
 	rows, err := reader.ReadAll()
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to read csv rows: %v", err)
 	}
 
 	for _, row := range rows {
 		timestamp, err := strconv.Atoi(row[timeIndex])
 		if err != nil {
-			return []domainEntities.SeriesObservation{}, err
+			return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to get timestamp: %v", err)
 		}
 		position := domainEntities.ObservationPosition{Lat: row[latIndex], Lon: row[lonIndex], Depth: row[depthIndex], QcFlag: QC_UNCERTAIN}
 		observations = append(observations, domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndex], QcFlag: QC_UNCERTAIN}})
