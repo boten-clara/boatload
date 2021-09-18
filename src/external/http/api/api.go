@@ -69,48 +69,60 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	return timeSeries, nil
 }
 
-func MapToSeriesObservation(key string, data io.Reader) ([]domainEntities.SeriesObservation, error) {
+func MapToSeriesObservation(keys []string, data io.Reader) (map[string][]domainEntities.SeriesObservation, error) {
+	observations := map[string][]domainEntities.SeriesObservation{}
 	reader := csv.NewReader(data)
+
 	header, err := reader.Read()
-
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to get reader: %v", err)
+		return observations, fmt.Errorf("failed to get reader: %v", err)
 	}
 
-	keyIndex, err := getKeyIndex(header, key) // TODO better validation
-	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+	for _, key := range keys {
+		observations[key] = []domainEntities.SeriesObservation{}
 	}
+
+	keyIndexes := map[string]int{}
+
+	for _, key := range keys {
+		keyIndex, err := getKeyIndex(header, key) // TODO better validation
+		if err != nil {
+			return observations, err
+		}
+		keyIndexes[key] = keyIndex
+	}
+
 	timeIndex, err := getKeyIndex(header, "timestamp")
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return observations, err
 	}
 	lonIndex, err := getKeyIndex(header, "lat")
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return observations, err
 	}
 	latIndex, err := getKeyIndex(header, "lon")
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return observations, err
 	}
 	depthIndex, err := getKeyIndex(header, "depth")
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, err
+		return observations, err
 	}
 
-	observations := []domainEntities.SeriesObservation{}
 	rows, err := reader.ReadAll()
 	if err != nil {
-		return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to read csv rows: %v", err)
+		return observations, fmt.Errorf("failed to read csv rows: %v", err)
 	}
 
 	for _, row := range rows {
 		timestamp, err := strconv.Atoi(row[timeIndex])
 		if err != nil {
-			return []domainEntities.SeriesObservation{}, fmt.Errorf("failed to get timestamp: %v", err)
+			return observations, fmt.Errorf("failed to get timestamp: %v", err)
 		}
 		position := domainEntities.ObservationPosition{Lat: row[latIndex], Lon: row[lonIndex], Depth: row[depthIndex], QcFlag: QC_UNCERTAIN}
-		observations = append(observations, domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndex], QcFlag: QC_UNCERTAIN}})
+		for _, key := range keys {
+			observations[key] = append(observations[key], domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndexes[key]], QcFlag: QC_UNCERTAIN}})
+		}
 	}
 
 	return observations, nil

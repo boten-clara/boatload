@@ -137,22 +137,33 @@ const testPayload = `{
 func TestShouldMapCsvToTimeSeries(t *testing.T) {
 	r := strings.NewReader(csvPayload)
 
-	mapped, err := api.MapToSeriesObservation("temperature", r)
+	keys := []string{"temperature", "conductivity"}
+	mapped, err := api.MapToSeriesObservation(keys, r)
+	temperatureObservations := mapped["temperature"]
+	conductivityObservations := mapped["conductivity"]
 
 	if err != nil {
 		t.Errorf("expected error to be nil, but got %v", err.Error())
 	}
 
-	if len(mapped) != 2 {
-		t.Errorf("expected len(mapped) to be 2, but was %v", len(mapped))
+	if len(temperatureObservations) != 2 {
+		t.Errorf("expected len(temperatureObservations) to be 2, but was %v", len(temperatureObservations))
 	}
 
-	if mapped[0].Time != "2021-09-18T14:40:40+02:00" {
-		t.Errorf("expected first timestamp to be 2021-09-18T14:15:40+00:00, but was %v", mapped[0].Time)
+	if len(conductivityObservations) != 2 {
+		t.Errorf("expected len(conductivityObservations) to be 2, but was %v", len(temperatureObservations))
 	}
 
-	if mapped[0].Body.Value != "69.69" {
-		t.Errorf("expected first temperature to be 69.69, but was %v", mapped[0].Body.Value)
+	if temperatureObservations[0].Time != "2021-09-18T14:40:40+02:00" {
+		t.Errorf("expected first timestamp to be 2021-09-18T14:15:40+00:00, but was %v", temperatureObservations[0].Time)
+	}
+
+	if temperatureObservations[0].Body.Value != "69.69" {
+		t.Errorf("expected first temperature to be 69.69, but was %v", temperatureObservations[0].Body.Value)
+	}
+
+	if conductivityObservations[1].Body.Value != "56.78" {
+		t.Errorf("expected second conductivity to be 56.78, but was %v", temperatureObservations[0].Body.Value)
 	}
 }
 
