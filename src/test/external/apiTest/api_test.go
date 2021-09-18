@@ -134,7 +134,6 @@ const testPayload = `{
 }
 `
 
-// TODO make this test pass, so that we know mapping works
 func TestShouldMapCsvToTimeSeries(t *testing.T) {
 	r := strings.NewReader(csvPayload)
 
