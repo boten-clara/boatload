@@ -1,7 +1,7 @@
 # boatload
-> maritime meteorological research data uploader
+> oceonagraphic research data uploader
 
-Tool for uploading maritime meteorological research data 
+Tool for uploading oceanographic research data 
 from research vessels to the `havvarsel-frost.met.no` API.
 
 frontend is served at `/uploader`
