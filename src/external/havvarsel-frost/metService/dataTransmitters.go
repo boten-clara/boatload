@@ -40,4 +40,3 @@ func (p prodDataTransmitter) SendData(r *http.Request) error {
 
 	return nil
 }
-

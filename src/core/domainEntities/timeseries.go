@@ -24,7 +24,7 @@ type TimeSeries struct {
 
 type seriesEntry struct {
 	Header       seriesHeader        `json:"header"`
-	Observations []seriesObservation `json:"observations"`
+	Observations []SeriesObservation `json:"observations"`
 }
 
 type seriesHeader struct {
@@ -42,18 +42,18 @@ type headerExtra struct {
 	Name   string `json:"name"`   // name of vessel
 }
 
-type seriesObservation struct {
+type SeriesObservation struct {
 	Time string          `json:"time"` // TODO: switch to date datatype??
-	Body observationBody `json:"body"`
+	Body ObservationBody `json:"body"`
 }
 
-type observationBody struct {
-	Pos    observationPosition `json:"pos"`
+type ObservationBody struct {
+	Pos    ObservationPosition `json:"pos"`
 	Value  string              `json:"value"` // the measured value (TODO data type?)
 	QcFlag string              `json:"qc_flag"`
 }
 
-type observationPosition struct {
+type ObservationPosition struct {
 	Lon    string `json:"lon"` // TODO figure out correct datatype
 	Lat    string `json:"lat"`
 	Depth  string `json:"depth"` // depth of measurement expressed in meters

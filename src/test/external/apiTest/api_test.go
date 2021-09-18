@@ -3,12 +3,14 @@ package apiTest
 import (
 	"bytes"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/sMailund/boatload/src/core/applicationServices"
 	"github.com/sMailund/boatload/src/core/domainEntities"
 	"github.com/sMailund/boatload/src/external/http/api"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 // TODO fix broken tests
@@ -131,3 +133,30 @@ const testPayload = `{
   ]
 }
 `
+
+// TODO make this test pass, so that we know mapping works
+func TestShouldMapCsvToTimeSeries(t *testing.T) {
+	r := strings.NewReader(csvPayload)
+
+	mapped, err := api.MapToSeriesObservation("temperature", r)
+
+	if err != nil {
+		t.Errorf("expected error to be nil, but got %v", err)
+	}
+
+	if len(mapped) != 2 {
+		t.Errorf("expected len(mapped) to be 2, but was %v", len(mapped))
+	}
+
+	if mapped[0].Time != "2021-09-18T14:15:40+00:00" {
+		t.Errorf("expected first timestamp to be 2021-09-18T14:15:40+00:00, but was %v", mapped[0].Time)
+	}
+
+	if mapped[0].Body.Value != "69.69" {
+		t.Errorf("expected first temperature to be 69.69, but was %v", mapped[0].Body.Value)
+	}
+}
+
+const csvPayload = `timestamp,lat,lon,depth,temperature,conductivity
+1631968840,58.144699,7.998280,69.69,420.69
+1631969344,50.421478,8.593940,12.34,56.78`

@@ -2,14 +2,21 @@ package api
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
-	"github.com/sMailund/boatload/src/core/applicationServices"
-	"github.com/sMailund/boatload/src/core/domainEntities"
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/sMailund/boatload/src/core/applicationServices"
+	"github.com/sMailund/boatload/src/core/domainEntities"
 )
 
 var UploadService applicationServices.UploadService
+
+const QC_UNCERTAIN = "2" // quality value: uncertain
 
 const UploadRoute = "/api/upload"
 
@@ -60,4 +67,60 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	}
 
 	return timeSeries, nil
+}
+
+func MapToSeriesObservation(key string, data io.Reader) ([]domainEntities.SeriesObservation, error) {
+	reader := csv.NewReader(data)
+	header, err := reader.Read()
+
+	if err != nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+
+	keyIndex, err := getKeyIndex(header, key) // TODO better validation
+	if err == nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+	timeIndex, err := getKeyIndex(header, "timestamp")
+	if err == nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+	lonIndex, err := getKeyIndex(header, "lat")
+	if err == nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+	latIndex, err := getKeyIndex(header, "lon")
+	if err == nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+	depthIndex, err := getKeyIndex(header, "depth")
+	if err == nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+
+	observations := []domainEntities.SeriesObservation{}
+	rows, err := reader.ReadAll()
+	if err != nil {
+		return []domainEntities.SeriesObservation{}, err
+	}
+
+	for _, row := range rows {
+		timestamp, err := strconv.Atoi(row[timeIndex])
+		if err != nil {
+			return []domainEntities.SeriesObservation{}, err
+		}
+		position := domainEntities.ObservationPosition{Lat: row[latIndex], Lon: row[lonIndex], Depth: row[depthIndex], QcFlag: QC_UNCERTAIN}
+		observations = append(observations, domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndex], QcFlag: QC_UNCERTAIN}})
+	}
+
+	return observations, nil
+}
+
+func getKeyIndex(row []string, key string) (int, error) {
+	for i, v := range row {
+		if v == key {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("csv header missing column key %v", key)
 }
