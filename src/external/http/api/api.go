@@ -48,7 +48,7 @@ func UploadTimeSeries(w http.ResponseWriter, req *http.Request) {
 }
 
 func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, error) {
-
+	keys := []string{"temperature", "conductivity"}
 	req.ParseMultipartForm(32 << 20) // limit your max input length!
 	var buf bytes.Buffer
 	// in your case file would be fileupload
@@ -59,8 +59,28 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	defer file.Close()
 	// Copy the file data to my buffer
 	io.Copy(&buf, file)
+	observations, err := MapToSeriesObservation(keys, &buf)
 
-	var timeSeries domainEntities.TimeSeries
+	timeSeries := domainEntities.TimeSeries{}
+
+	seriesEntries := []domainEntities.SeriesEntry{}
+	for _, key := range keys {
+		entry := domainEntities.SeriesEntry{
+			Header: domainEntities.SeriesHeader{
+				Id: domainEntities.HeaderId{
+					GliderId:  "TODO",
+					Parameter: "TODO",
+				},
+				Extra: domainEntities.HeaderExtra{
+					Source: "TODO",
+					Name:   "TODO",
+				},
+			},
+			Observations: observations[key],
+		}
+		seriesEntries = append(seriesEntries, entry) // TODO fortsett her
+	}
+
 	err = json.NewDecoder(&buf).Decode(&timeSeries)
 	if err != nil {
 		return domainEntities.TimeSeries{}, err
