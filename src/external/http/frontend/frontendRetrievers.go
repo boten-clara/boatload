@@ -45,7 +45,7 @@ const uploadPage = `<!DOCTYPE html>
 
 <body>
 <h1>boatload</h1>
-<h2>oceanographic research data uploader v0.1</h2>
+<h2>oceanographic research data uploader v1.0</h2>
 <input id="file" type="file" />
 <input type = "button" onclick = "upload()" value = "upload">  
 <p id="status"></p>
