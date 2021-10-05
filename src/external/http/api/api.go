@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -60,6 +59,9 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	// Copy the file data to my buffer
 	io.Copy(&buf, file)
 	observations, err := MapToSeriesObservation(keys, &buf)
+	if err != nil {
+		return domainEntities.TimeSeries{}, err
+	}
 
 	seriesEntries := []domainEntities.SeriesEntry{}
 	for _, key := range keys {
@@ -82,11 +84,6 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	timeSeries := domainEntities.TimeSeries{
 		TimeSeriesType:  "TODO",
 		TimeSeriesEntry: seriesEntries,
-	}
-
-	err = json.NewDecoder(&buf).Decode(&timeSeries)
-	if err != nil {
-		return domainEntities.TimeSeries{}, err
 	}
 
 	return timeSeries, nil
