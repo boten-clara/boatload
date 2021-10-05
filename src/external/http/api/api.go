@@ -61,8 +61,6 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 	io.Copy(&buf, file)
 	observations, err := MapToSeriesObservation(keys, &buf)
 
-	timeSeries := domainEntities.TimeSeries{}
-
 	seriesEntries := []domainEntities.SeriesEntry{}
 	for _, key := range keys {
 		entry := domainEntities.SeriesEntry{
@@ -79,6 +77,11 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 			Observations: observations[key],
 		}
 		seriesEntries = append(seriesEntries, entry) // TODO fortsett her
+	}
+
+	timeSeries := domainEntities.TimeSeries{
+		TimeSeriesType:  "TODO",
+		TimeSeriesEntry: seriesEntries,
 	}
 
 	err = json.NewDecoder(&buf).Decode(&timeSeries)
