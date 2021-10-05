@@ -13,6 +13,12 @@ import (
 	"github.com/sMailund/boatload/src/core/domainEntities"
 )
 
+const (
+	ASSOCIATION_INITIALS = "ssf"
+	ASSOCIATION_NAME     = "Studentenes Sjøfarts Selskab"
+	VESSEL_NAME          = "clara"
+)
+
 var UploadService applicationServices.UploadService
 
 const QC_UNCERTAIN = "2" // quality value: uncertain
@@ -68,21 +74,21 @@ func readTimeSeriesFromRequest(req *http.Request) (domainEntities.TimeSeries, er
 		entry := domainEntities.SeriesEntry{
 			Header: domainEntities.SeriesHeader{
 				Id: domainEntities.HeaderId{
-					GliderId:  "TODO",
-					Parameter: "TODO",
+					GliderId:  createGliderId(),
+					Parameter: key,
 				},
 				Extra: domainEntities.HeaderExtra{
-					Source: "TODO",
-					Name:   "TODO",
+					Source: ASSOCIATION_NAME,
+					Name:   VESSEL_NAME,
 				},
 			},
 			Observations: observations[key],
 		}
-		seriesEntries = append(seriesEntries, entry) // TODO fortsett her
+		seriesEntries = append(seriesEntries, entry)
 	}
 
 	timeSeries := domainEntities.TimeSeries{
-		TimeSeriesType:  "TODO",
+		TimeSeriesType:  "glider",
 		TimeSeriesEntry: seriesEntries,
 	}
 
@@ -155,4 +161,8 @@ func getKeyIndex(row []string, key string) (int, error) {
 		}
 	}
 	return -1, fmt.Errorf("csv header missing column key %v", key)
+}
+
+func createGliderId() string {
+	return fmt.Sprintf("%v_%v", ASSOCIATION_INITIALS, VESSEL_NAME)
 }
