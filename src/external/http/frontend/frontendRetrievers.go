@@ -14,7 +14,7 @@ const uploadPage = `<!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
-  <title>Boatload maritime meteorological data uploader</title>
+  <title>Boatload oceanographic meteorological data uploader</title>
 
   <script type="text/javascript">
 	function upload() {
@@ -45,7 +45,7 @@ const uploadPage = `<!DOCTYPE html>
 
 <body>
 <h1>boatload</h1>
-<h2>maritime research data uploader v0.1</h2>
+<h2>oceanographic research data uploader v0.1</h2>
 <input id="file" type="file" />
 <input type = "button" onclick = "upload()" value = "upload">  
 <p id="status"></p>
