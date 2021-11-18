@@ -147,7 +147,7 @@ func MapToSeriesObservation(keys []string, data io.Reader) (map[string][]domainE
 		}
 		position := domainEntities.ObservationPosition{Lat: row[latIndex], Lon: row[lonIndex], Depth: row[depthIndex], QcFlag: QC_UNCERTAIN}
 		for _, key := range keys {
-			observations[key] = append(observations[key], domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndexes[key]], QcFlag: QC_UNCERTAIN}})
+			observations[key] = append(observations[key], domainEntities.SeriesObservation{Time: time.Unix(int64(timestamp), 0).UTC().Format(time.RFC3339), Body: domainEntities.ObservationBody{Pos: position, Value: row[keyIndexes[key]], QcFlag: QC_UNCERTAIN}})
 		}
 	}
 
